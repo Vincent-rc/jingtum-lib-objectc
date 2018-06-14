@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		123CB8ECEEC011B05AB31423 /* libPods-WebSocketClient.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7A57CD9387842338E78D4445 /* libPods-WebSocketClient.a */; };
 		C447523120ABBA9B009BB1DE /* SocketRocketUtility.m in Sources */ = {isa = PBXBuildFile; fileRef = C447523020ABBA9B009BB1DE /* SocketRocketUtility.m */; };
+		C44A2EC720D2666B00F73065 /* Remote.m in Sources */ = {isa = PBXBuildFile; fileRef = C44A2EC520D2666A00F73065 /* Remote.m */; };
 		C4F63AAE20AA6756009CF95A /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = C4F63AAD20AA6756009CF95A /* AppDelegate.m */; };
 		C4F63AB120AA6756009CF95A /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = C4F63AB020AA6756009CF95A /* ViewController.m */; };
 		C4F63AB420AA6756009CF95A /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = C4F63AB220AA6756009CF95A /* Main.storyboard */; };
@@ -41,6 +42,8 @@
 		AEBF2D816B254EF37937CA50 /* Pods-WebSocketClient.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-WebSocketClient.debug.xcconfig"; path = "Pods/Target Support Files/Pods-WebSocketClient/Pods-WebSocketClient.debug.xcconfig"; sourceTree = "<group>"; };
 		C447522F20ABBA9B009BB1DE /* SocketRocketUtility.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SocketRocketUtility.h; path = WebSocketClient/WebSocket/SocketRocketUtility.h; sourceTree = SOURCE_ROOT; };
 		C447523020ABBA9B009BB1DE /* SocketRocketUtility.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SocketRocketUtility.m; path = WebSocketClient/WebSocket/SocketRocketUtility.m; sourceTree = SOURCE_ROOT; };
+		C44A2EC520D2666A00F73065 /* Remote.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = Remote.m; path = "WebSocketClient/jingtum-lib/Remote.m"; sourceTree = SOURCE_ROOT; };
+		C44A2EC620D2666A00F73065 /* Remote.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Remote.h; path = "WebSocketClient/jingtum-lib/Remote.h"; sourceTree = SOURCE_ROOT; };
 		C4F63AA920AA6756009CF95A /* WebSocketClient.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = WebSocketClient.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C4F63AAC20AA6756009CF95A /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		C4F63AAD20AA6756009CF95A /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
@@ -108,6 +111,8 @@
 			children = (
 				C447522F20ABBA9B009BB1DE /* SocketRocketUtility.h */,
 				C447523020ABBA9B009BB1DE /* SocketRocketUtility.m */,
+				C44A2EC620D2666A00F73065 /* Remote.h */,
+				C44A2EC520D2666A00F73065 /* Remote.m */,
 			);
 			name = WebSocket;
 			path = "New Group";
@@ -325,6 +330,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C44A2EC720D2666B00F73065 /* Remote.m in Sources */,
 				C4F63AB120AA6756009CF95A /* ViewController.m in Sources */,
 				C447523120ABBA9B009BB1DE /* SocketRocketUtility.m in Sources */,
 				C4F63ABC20AA6756009CF95A /* main.m in Sources */,
