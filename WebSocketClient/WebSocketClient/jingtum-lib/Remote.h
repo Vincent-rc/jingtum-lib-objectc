@@ -8,12 +8,28 @@
 
 #import <Foundation/Foundation.h>
 #import <SocketRocket.h>
+#import "Transaction.h"
+
+@class Transaction;
 
 extern NSString * const kWebSocketDidOpen;
 extern NSString * const kWebSocketDidClose;
 extern NSString * const kWebSocketdidReceiveMessage;
 
-@interface Remote : NSObject
+@interface Remote : NSObject <SRWebSocketDelegate>
+{
+    int _index;
+    NSTimer * heartBeat;
+    NSTimeInterval reConnectTime;
+}
+
+@property (nonatomic,strong) SRWebSocket *socket;
+
+@property (nonatomic,copy) NSString *urlString;
+
+@property (nonatomic) BOOL isLocal;
+
+@property (nonatomic, strong) Transaction *tx;
 
 + (Remote *)instance;
 
@@ -30,5 +46,6 @@ extern NSString * const kWebSocketdidReceiveMessage;
 -(void)requestAccountOffers:(NSDictionary*)paramDic;
 -(void)requestAccountTx:(NSDictionary*)paramDic;
 -(void)requestOrderBook:(NSDictionary*)paramDic;
+-(void)buildPaymentTx:(NSDictionary*)paramDic;
 
 @end

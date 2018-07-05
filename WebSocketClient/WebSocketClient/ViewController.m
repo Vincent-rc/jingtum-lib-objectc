@@ -9,6 +9,8 @@
 #import "ViewController.h"
 #import "SocketRocketUtility.h"
 #import "Remote.h"
+#import "NSData+Hash.h"
+#import "NSString+Base58.h"
 
 @interface ViewController ()
 
@@ -89,7 +91,79 @@
 //    [dic setObject:limit forKey:@"limit"];
 //    [[Remote instance] requestOrderBook:dic];
 
+//    [dic setObject:@"jB7rxgh43ncbTX4WeMoeadiGMfmfqY2xLZ" forKey:@"account"];
+//    [dic setObject:@"jDUjqoDZLhzx4DCf6pvSivjkjgtRESY62c" forKey:@"to"];
+//
+//    NSMutableDictionary *amount = [[NSMutableDictionary alloc] init];
+//    NSNumber *value = [NSNumber numberWithFloat:0.5];
+//    [amount setObject:value forKey:@"value"];
+//    [amount setObject:@"SWT" forKey:@"currency"];
+//    [amount setObject:@" " forKey:@"issuer"];
+//    [dic setObject:amount forKey:@"amount"];
+//
+//    [dic setObject:@"sn37nYrQ6KPJvTFmaBYokS3FjXUWd" forKey:@"secret"];
+//    [dic setObject:@"给jDUjqoDZLhzx4DCf6pvSivjkjgtRESY62c支付0.5swt." forKey:@"memo"];
+//
+//    [[Remote instance] buildPaymentTx:dic];
+    
+    char bytes[17];
+    int SEED_PREFIX = 33;
+    bytes[0] = (char)SEED_PREFIX;
+    for (int x = 1; x < 17; bytes[x++] = (char)('0' + (arc4random_uniform(10))));
+    //    for (int x = 1; x < 17; bytes[x++] = (char)('1'));
+    
+    NSData *data = [NSData dataWithBytes:bytes length:strlen(bytes)];
+    NSData *data1 = [data SHA256]; // 0x0000600000440e40 <435cd747 69f0b100 6c326a4c be9858b4 5b758250 77d7935a b10632a1 0df5d984>
+    NSData *data2 = [data1 SHA256]; // <81a8856c e9d550ec cde94b2b ad489577 585509e4 11cfb96b c54fa02f 571604bf>
+    
+    char checksum[5];
+    char *cstr = [data2 bytes];
+    strlcpy(checksum, cstr, 5);
+    
+    char ret[22];
+    sprintf(ret, "%s%s", bytes, checksum);
+    
+    NSData *retdata = [NSData dataWithBytes:ret length:strlen(ret)];
+    NSString *secret = [NSString base58WithData:retdata];
+    
+    NSLog(@"the secret is %@", secret);
+    
+    NSData* tag = [@"com.example.keys.mykey" dataUsingEncoding:NSUTF8StringEncoding];
+    NSDictionary* attributes =
+    @{ (id)kSecAttrKeyType:               (id)kSecAttrKeyTypeRSA,
+       (id)kSecAttrKeySizeInBits:         @2048,
+       (id)kSecPrivateKeyAttrs:
+           @{ (id)kSecAttrIsPermanent:    @YES,
+              (id)kSecAttrApplicationTag: tag,
+              },
+       };
+    CFErrorRef error = NULL;
+    SecKeyRef privateKey = SecKeyCreateRandomKey((__bridge CFDictionaryRef)attributes,
+                                                 &error);
+    if (!privateKey) {
+        NSError *err = CFBridgingRelease(error);  // ARC takes ownership
+        // Handle the error. . .
+    }
+    SecKeyRef publicKey = SecKeyCopyPublicKey(privateKey);
+    
+    if (publicKey)  { CFRelease(publicKey);  }
+    if (privateKey) { CFRelease(privateKey); }
 }
+
+//string base58_encode(Integer num, string vers)
+//{
+//    string alphabet[58] = {"1","2","3","4","5","6","7","8","9","A","B","C","D","E","F",
+//        "G","H","J","K","L","M","N","P","Q","R","S","T","U","V","W","X","Y","Z","a","b","c",
+//        "d","e","f","g","h","i","j","k","m","n","o","p","q","r","s","t","u","v","w","x","y","z"};
+//    int base_count = 58; string encoded; Integer div; Integer mod;
+//    while (num >= base_count)
+//    {
+//        div = num / base_count;   mod = (num - (base_count * div));
+//        encoded = alphabet[ mod.ConvertToLong() ] + encoded;   num = div;
+//    }
+//    encoded = vers + alphabet[ num.ConvertToLong() ] + encoded;
+//    return encoded;
+//}
 
 - (void)SRWebSocketDidReceiveMsg:(NSNotification *)note {
     //收到服务端发送过来的消息

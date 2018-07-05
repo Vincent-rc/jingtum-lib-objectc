@@ -7,6 +7,7 @@
 //
 
 #import "Remote.h"
+#import "Transaction.h"
 
 #define dispatch_main_async_safe(block)\
 if ([NSThread isMainThread]) {\
@@ -20,22 +21,10 @@ NSString * const kWebSocketDidOpen           = @"kWebSocketDidOpen";
 NSString * const kWebSocketDidClose          = @"kWebSocketDidClose";
 NSString * const kWebSocketdidReceiveMessage = @"kWebSocketdidReceiveMessage";
 
-@interface Remote()<SRWebSocketDelegate>
-{
-    int _index;
-    NSTimer * heartBeat;
-    NSTimeInterval reConnectTime;
-}
-
-@property (nonatomic,strong) SRWebSocket *socket;
-
-@property (nonatomic,copy) NSString *urlString;
-
-@property (nonatomic) BOOL isLocal;
-
-@end
-
 @implementation Remote
+
+@synthesize isLocal;
+@synthesize tx;
 
 +(Remote *)instance{
     static Remote *Instance = nil;
@@ -43,6 +32,7 @@ NSString * const kWebSocketdidReceiveMessage = @"kWebSocketdidReceiveMessage";
     dispatch_once(&predicate, ^{
         Instance = [[Remote alloc] init];
     });
+    
     return Instance;
 }
 
@@ -106,6 +96,9 @@ NSString * const kWebSocketdidReceiveMessage = @"kWebSocketdidReceiveMessage";
         NSLog(@"************************** receive data from socket************************** ");
 //        NSLog(@"message: %@", message);
         [[NSNotificationCenter defaultCenter] postNotificationName:kWebSocketdidReceiveMessage object:message];
+        if (tx != nil) {
+            [tx sign:message];
+        }
     }
 }
 
@@ -311,7 +304,8 @@ NSString * const kWebSocketdidReceiveMessage = @"kWebSocketdidReceiveMessage";
 }
 
 -(void)requestAccountInfo:(NSDictionary*)paramDic
-{NSString *account = [paramDic objectForKey:@"account"];
+{
+    NSString *account = [paramDic objectForKey:@"account"];
     if (account != nil) {
         NSMutableDictionary *dic = [[NSMutableDictionary alloc] init];
         NSMutableArray *array = [[NSMutableArray alloc] init];
@@ -484,12 +478,26 @@ NSString * const kWebSocketdidReceiveMessage = @"kWebSocketdidReceiveMessage";
         [dic setObject:num forKey:@"id"];
         [dic setObject:@"book_offers" forKey:@"command"]; // book_offers
         
-        if ([self isValidAmount0:gets]) {
-            [dic setObject:gets forKey:@"taker_gets"];
+        if (taker_gets != nil) {
+            if ([self isValidAmount0:taker_gets]) {
+                [dic setObject:taker_gets forKey:@"taker_gets"];
+            }
+        } else {
+            if ([self isValidAmount0:gets]) {
+                [dic setObject:gets forKey:@"taker_gets"];
+            }
         }
-        if ([self isValidAmount0:pays]) {
-            [dic setObject:pays forKey:@"taker_pays"];
+        
+        if (taker_pays != nil) {
+            if ([self isValidAmount0:taker_pays]) {
+                [dic setObject:taker_pays forKey:@"taker_pays"];
+            }
+        } else {
+            if ([self isValidAmount0:pays]) {
+                [dic setObject:pays forKey:@"taker_pays"];
+            }
         }
+        
         NSObject *taker = [paramDic objectForKey:@"taker"];
         if (taker != nil) {
             [dic setObject:taker forKey:@"taker"];
@@ -510,6 +518,55 @@ NSString * const kWebSocketdidReceiveMessage = @"kWebSocketdidReceiveMessage";
     } else {
         NSLog(@"invalid taker gets amount");
     }
+}
+
+-(void)buildPaymentTx:(NSDictionary *)paramDic
+{
+    NSString *source = [paramDic objectForKey:@"source"];
+    NSString *from = [paramDic objectForKey:@"from"];
+    NSString *account = [paramDic objectForKey:@"account"];
+    NSString *destination = [paramDic objectForKey:@"destination"];
+    NSString *to = [paramDic objectForKey:@"to"];
+    NSDictionary *amount = [paramDic objectForKey:@"amount"];
+    
+    NSString *secret = [paramDic objectForKey:@"secret"];
+    NSString *memo = [paramDic objectForKey:@"memo"];
+    
+    NSString *src = nil;
+    NSString *dst = nil;
+    if (source != nil) {
+        src = source;
+    } else if (from != nil) {
+        src = from;
+    } else if (account != nil) {
+        src = account;
+    }
+    if (destination != nil) {
+        dst = destination;
+    } else if (to != nil) {
+        dst = to;
+    }
+    
+    if (![self isValidAddress:src]) {
+        NSLog(@"invalid source address");
+        return;
+    }
+    if (![self isValidAddress:dst]) {
+        NSLog(@"invalid destination address");
+        return;
+    }
+    if (![self isValidAddress:account]) { // ????????????
+        NSLog(@"invalid amount");
+        return;
+    }
+    
+    tx = [[Transaction alloc] init];
+    tx.remote = self;
+    
+    [tx setSecret:secret];
+    [tx addMemo:memo];
+    
+    [tx submit:src];
 }
 
 @end
